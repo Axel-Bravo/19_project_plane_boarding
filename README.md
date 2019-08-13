@@ -1,2 +1,5 @@
-# beer_game
-Beer distribution game
+# On boarding
+Plane seats on boarding [OpenAI gym](https://github.com/openai/gym) environment.  
+
+
+`Under development`
