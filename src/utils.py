@@ -1,150 +1,10 @@
 import random
 
-
-class Passenger(object):
-
-    def __init__(self, seat: (int, int), plane):
-        """
-        Passenger initialization
-        :param seat: seat assigned to passenger; (seat, aisle)
-        :param plane:
-        """
-        # Static
-        self.seat = seat
-        self.baggage = random.randint(0, 20)
-        self.plane = plane
-
-        # Dynamic
-        self.pos = [-1, -1]
-        self.move = ''
-        self.move_count = -1
-
-    def choose_move(self):
-        if self.seat == self.pos:
-            self.move = 'sit'
-            return
-
-        if self.seat[0] > self.pos[0]:
-            self.move = 'up'
-            return
-
-        if self.seat[0] == self.pos[0]:
-            if self.baggage > 0:
-                self.move = 'baggage'
-                return
-            if self.seat[1] > self.pos[1]:
-                self.move = 'right'
-                return
-            else:
-                self.move = 'left'
-                return
-        print("error! Unknows step")
-
-    def move(self):
-        if self.move == '':
-            self.choose_move()
-        if self.move == 'sit':
-            self.sit()
-        if self.move == 'up':
-            self.moveUp()
-        if self.move == 'baggage':
-            self.setBaggage()
-        if self.move == 'right':
-            self.moveRight()
-        if self.move == 'left':
-            self.moveLeft()
-        if self.move == 'standLeft':
-            self.standLeft()
-        if self.move == 'standRight':
-            self.standRight()
-
-    def moveRight(self):
-        clear = True
-        for seat in range(self.pos[1] + 1, self.seat[1]):
-            if not self.plane.is_empty(self.pos[0], seat):
-                clear = False
-                for agent in self.plane.squares[self.pos[0]][seat]:
-                    if agent.seat[1] < self.seat[1] and not agent in self.plane.nextSquares[self.pos[0]][self.pos[1]]:
-                        agent.curMove = 'standLeft'
-        if not clear:
-            self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-            return
-        if clear:
-            myTurn = True
-            for agent in self.plane.squares[self.pos[0]][self.pos[1]]:
-                if agent == self:
-                    continue
-                if agent.seat[1] > self.seat[1] and agent.curMove == self.move:
-                    myTurn = False
-            if not myTurn:
-                self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-                return
-            self.pos[1] += 1
-            self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-            if self.pos[1] == self.seat[1]:
-                self.move = ''
-            return
-
-    def moveLeft(self):
-        clear = True
-        for seat in range(self.seat[1], self.pos[1]):
-            if not self.plane.is_empty(self.pos[0], seat):
-                clear = False
-                for agent in self.plane.squares[self.pos[0]][seat]:
-                    if agent.seat[1] > self.seat[1] and not agent in self.plane.nextSquares[self.pos[0]][self.pos[1]]:
-                        agent.curMove = 'standRight'
-        if not clear:
-            self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-            return
-        if clear:
-            myTurn = True
-            for agent in self.plane.squares[self.pos[0]][self.pos[1]]:
-                if agent == self:
-                    continue
-                if agent.seat[1] < self.seat[1] and agent.curMove == self.move:
-                    myTurn = False
-            if not myTurn:
-                self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-                return
-            self.pos[1] -= 1
-            self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-            if self.pos[1] == self.seat[1]:
-                self.move = ''
-            return
-
-    def moveUp(self):
-        if self.plane.is_empty(self.pos[0] + 1, self.pos[1]) and len(self.plane.squares[self.pos[0]][self.pos[1]]) == 1:
-            self.pos[0] += 1
-            self.move = ''
-        self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-        return
-
-    def setBaggage(self):
-        self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-        self.baggage -= 1
-        if self.baggage == 0:
-            self.move = ''
-        return
-
-    def standLeft(self):
-        if self.plane.is_empty(self.pos[0], self.pos[1] - 1) or self.plane.layout[self.pos[1] - 1] == 1:
-            self.pos[1] -= 1
-        if self.plane.layout[self.pos[1]] == 1:
-            self.move = 'right'
-        self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-        return
-
-    def standRight(self):
-        if self.plane.is_empty(self.pos[0], self.pos[1] + 1) or self.plane.layout[self.pos[1] + 1] == 1:
-            self.pos[1] += 1
-        if self.plane.layout[self.pos[1]] == 1:
-            self.move = 'left'
-        self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-        return
-
-    def sit(self):
-        self.plane.nextSquares[self.pos[0]][self.pos[1]].append(self)
-        return
+planes_layouts = {
+    'b_737': (1, 1, 1, 0, 1, 1, 1),
+    'b_747': (1, 1, 0, 1, 1, 1, 1, 0, 1, 1),
+    'a_380': (1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1)
+}
 
 
 class Plane(object):
@@ -153,7 +13,7 @@ class Plane(object):
         """
         Plane initialization
         :param seat_rows: number of rows from the airplane
-        :param seat_layout: seat columns structure; e.g. (1, 1, 1, 0, 1, 1, 1);  1 - seat, 0 - aisle
+        :param seat_layout: seat columns structure; e.g. (0, 0, 0, 1, 0, 0, 0);  0 - seat, 1 - aisle
         """
         self.seat_rows = seat_rows
         self.seat_layout = seat_layout
@@ -173,11 +33,11 @@ class Plane(object):
         Checks if all passengers are currently seated
         """
         for agent in self.passengers:
-            if agent.curMove != 'sit':
+            if agent.current_mov != 'sit':
                 return False
         return True
 
-    def is_empty(self, row: int, col: int) -> bool:
+    def is_empty(self, row: int, col:int) -> bool:
         """
         Checks if a seat is and/or will be empty
         :param row: seat's row
@@ -185,3 +45,141 @@ class Plane(object):
         :return: seat and will be empty
         """
         return len(self.layout[row][col]) == 0 and len(self.next_layout[row][col]) == 0
+
+
+class Passenger(object):
+
+    def __init__(self, seat: (int, int), plane: Plane):
+        """
+        Passenger initialization
+        :param seat: seat assigned to passenger; (seat, column)
+        :param plane:
+        """
+        # Static
+        self.seat = list(seat)
+        self.baggage = random.randint(0, 20)
+        self.plane = plane
+        # Dynamic
+        self.pos = [-1, -1]
+        self.current_mov = ''
+        self.move_count = -1
+
+    def choose_move(self):
+        if self.seat == self.pos:
+            self.current_mov = 'sit'
+            return
+
+        if self.seat[0] > self.pos[0]:
+            self.current_mov = 'up'
+            return
+
+        if self.seat[0] == self.pos[0]:
+            if self.baggage > 0:
+                self.current_mov = 'baggage'
+                return
+            if self.seat[1] > self.pos[1]:
+                self.current_mov = 'right'
+                return
+            else:
+                self.current_mov = 'left'
+                return
+        print("error! Unknown step")
+
+    def move(self):
+        if self.current_mov == '':
+            self.choose_move()
+        if self.current_mov == 'sit':
+            self.sit()
+        if self.current_mov == 'up':
+            self.move_up()
+        if self.current_mov == 'baggage':
+            self.set_baggage()
+        if self.current_mov == 'right':
+            self.move_right()
+        if self.current_mov == 'left':
+            self.move_left()
+        if self.current_mov == 'standLeft':
+            self.stand_left()
+        if self.current_mov == 'standRight':
+            self.stand_right()
+
+    def move_right(self):
+        clear = True
+        for seat in range(self.pos[1] + 1, self.seat[1]):
+            if not self.plane.is_empty(self.pos[0], seat):
+                clear = False
+                for agent in self.plane.layout[self.pos[0]][seat]:
+                    if agent.seat[1] < self.seat[1] and not agent in self.plane.next_layout[self.pos[0]][self.pos[1]]:
+                        agent.current_mov = 'standLeft'
+        if not clear:
+            self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+            return
+        if clear:
+            my_turn = True
+            for agent in self.plane.layout[self.pos[0]][self.pos[1]]:
+                if agent == self:
+                    continue
+                if agent.seat[1] > self.seat[1] and agent.current_mov == self.current_mov:
+                    my_turn = False
+            if not my_turn:
+                self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+                return
+            self.pos[1] += 1
+            self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+            if self.pos[1] == self.seat[1]:
+                self.current_mov = ''
+
+    def move_left(self):
+        clear = True
+        for seat in range(self.seat[1], self.pos[1]):
+            if not self.plane.is_empty(self.pos[0], seat):
+                clear = False
+                for agent in self.plane.layout[self.pos[0]][seat]:
+                    if agent.seat[1] > self.seat[1] and not agent in self.plane.next_layout[self.pos[0]][self.pos[1]]:
+                        agent.current_mov = 'standRight'
+        if not clear:
+            self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+            return
+        if clear:
+            my_turn = True
+            for agent in self.plane.layout[self.pos[0]][self.pos[1]]:
+                if agent == self:
+                    continue
+                if agent.seat[1] < self.seat[1] and agent.current_mov == self.current_mov:
+                    my_turn = False
+            if not my_turn:
+                self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+                return
+            self.pos[1] -= 1
+            self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+            if self.pos[1] == self.seat[1]:
+                self.current_mov = ''
+
+    def move_up(self):
+        if self.plane.is_empty(self.pos[0] + 1, self.pos[1]) and len(self.plane.layout[self.pos[0]][self.pos[1]]) == 1:
+            self.pos[0] += 1
+            self.current_mov = ''
+        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+
+    def set_baggage(self):
+        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+        self.baggage -= 1
+        if self.baggage == 0:
+            self.current_mov = ''
+
+    def stand_left(self):
+        if self.plane.is_empty(self.pos[0], self.pos[1] - 1) or self.plane.seat_layout[self.pos[1] - 1] == 0:
+            self.pos[1] -= 1
+        if self.plane.seat_layout[self.pos[1]] == 0:
+            self.current_mov = 'right'
+        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+
+    def stand_right(self):
+        if self.plane.is_empty(self.pos[0], self.pos[1] + 1) or self.plane.seat_layout[self.pos[1] + 1] == 0:
+            self.pos[1] += 1
+        if self.plane.seat_layout[self.pos[1]] == 0:
+            self.current_mov = 'left'
+        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+
+    def sit(self):
+        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
