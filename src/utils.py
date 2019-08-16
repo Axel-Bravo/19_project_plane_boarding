@@ -1,4 +1,7 @@
+import os
+import time
 import random
+from itertools import compress, product
 
 planes_layouts = {
     'b_737': (1, 1, 1, 0, 1, 1, 1),
@@ -119,6 +122,7 @@ class Passenger(object):
             for agent in self.plane.layout[self.pos[0]][self.pos[1]]:
                 if agent == self:
                     continue
+
                 if agent.seat[1] > self.seat[1] and agent.current_mov == self.current_mov:
                     my_turn = False
             if not my_turn:
@@ -183,3 +187,63 @@ class Passenger(object):
 
     def sit(self):
         self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+
+
+def generate_queue(plane: Plane) -> list:
+    """
+    Generates a queue of passengers
+    :param plane: a plane in order to know seats availability
+    :return: passenger's queue
+    """
+    queue = []
+    seat_columns = compress(range(len(plane.seat_layout)), plane.seat_layout)
+    seats = product(list(range(plane.seat_rows)), seat_columns)
+
+    for seat in seats:
+        queue.append(Passenger(seat=seat, plane=plane))
+
+    return queue
+
+
+def print_simulation(plane: Plane, queue: list, aisle_columns: list, num_simulations: int):
+    """
+    Print the simulation by the  python's terminal console
+    :param plane: plane used in the simulation
+    :param queue: queue of passengers of the on-boarding process
+    :param aisle_columns: aisle'columns plane layout
+    :param num_simulations: number of simulations to execute
+    """
+    os.system('clear')
+    for _ in range(len(plane.seat_layout) + 1):  # Print separator
+        print("", end='')
+
+    for _ in range(len(queue)):  # Print remaining queue
+        print('<', end='')
+    print('\n')
+
+    for i in range(plane.seat_rows):  # Print current plane layout status
+        for j in range(len(plane.seat_layout)):
+            if len(plane.layout[i][j]) != 0:
+                if len(plane.layout[i][j]) > 1:
+                    print(len(plane.layout[i][j]), end='')
+                elif plane.layout[i][j][0].current_mov == 'standRight' or plane.layout[i][j][
+                    0].current_mov == 'right':
+                    print('>', end='')
+                elif plane.layout[i][j][0].current_mov == 'standLeft' or plane.layout[i][j][0].current_mov == 'left':
+                    print('<', end='')
+                elif plane.layout[i][j][0].current_mov == 'up':
+                    print('V', end='')
+                elif plane.layout[i][j][0].current_mov == 'baggage':
+                    print('B', end='')
+                elif plane.layout[i][j][0].current_mov == 'sit':
+                    print('S', end='')
+                else:
+                    print('?', end='')
+            elif j in aisle_columns:
+                print('|', end='')
+            else:
+                print('_', end='')
+        print('')
+
+    print('\nCurrent round: {}'.format(num_simulations))
+    time.sleep(0.04)
