@@ -58,7 +58,7 @@ class OnBoardingEnvironment(gym.Env):
         observation_space = []
 
         for passenger in self.queue:
-            observation_space.append(passenger.seat.extend([passenger.baggage]))
+            observation_space.append(passenger.seat + [passenger.baggage])
 
         return observation_space
 
@@ -74,7 +74,7 @@ class OnBoardingEnvironment(gym.Env):
         # Run simulation
         while True:
             if len(self.queue) == 0 and self.plane.all_seated():
-                return None, self.rounds, True, {}  # Corresponding to observation, reward, done, {}
+                return None, self.rounds, True, None  # Corresponding to observation, reward, done, info
 
             for agent in self.plane.passengers:  # update agents
                 agent.move()
