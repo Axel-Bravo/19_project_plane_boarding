@@ -58,7 +58,7 @@ class OnBoardingEnvironment(gym.Env):
         observation_space = []
 
         for passenger in self.queue:
-            observation_space.append(passenger.seat.extend(passenger.baggage))
+            observation_space.append(passenger.seat.extend([passenger.baggage]))
 
         return observation_space
 
