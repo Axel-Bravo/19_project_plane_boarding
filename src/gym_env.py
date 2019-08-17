@@ -38,10 +38,10 @@ class OnBoardingEnvironment(gym.Env):
         self.action_space = spaces.MultiDiscrete([self.num_passengers for _ in range(self.num_passengers)])
 
         # State space  is [(row, column, baggage) * num_passengers]
-        #  Rows: (0, seat_rows-1)
-        #  Columns: (0, len(seat_layout)-1); although there are values not appearing, the aisles
-        #  Baggage: (0, 20)
-        self.passenger_space = [(0, seat_rows - 1), (0, len(seat_layout) - 1), (0, 20)]
+        #  Rows: seat_rows
+        #  Columns: (0, len(seat_layout)-1) -> len(seat_layout); although aisles are not "usable"
+        #  Baggage: (0, 20) -> 21 values; current implementation
+        self.passenger_space = [seat_rows, len(seat_layout), 21]
         self.observation_space = spaces.MultiDiscrete([self.passenger_space for _ in range(self.num_passengers)])
 
         # Simulation required attributes
