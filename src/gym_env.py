@@ -74,7 +74,7 @@ class OnBoardingEnvironment(gym.Env):
         # Run simulation
         while True:
             if len(self.queue) == 0 and self.plane.all_seated():
-                return None, self.rounds, True, None  # Corresponding to observation, reward, done, info
+                return None, -self.rounds, True, None  # Corresponding to observation, reward, done, info
 
             for agent in self.plane.passengers:  # update agents
                 agent.move()
