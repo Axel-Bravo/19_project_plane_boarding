@@ -33,9 +33,9 @@ class OnBoardingEnvironment(gym.Env):
 
         # The action space is basically an ordering for the passengers queue
         # Having:
-        #        (0, number of passengers - 1)  * number of passengers
+        #        (number of passengers order possibilities)  * number of passengers
         # In combination with the state space, it indicates which is the entering order, a passenger should have
-        self.action_space = spaces.MultiDiscrete([(0, self.num_passengers - 1) for _ in range(self.num_passengers)])
+        self.action_space = spaces.MultiDiscrete([self.num_passengers for _ in range(self.num_passengers)])
 
         # State space  is [(row, column, baggage) * num_passengers]
         #  Rows: (0, seat_rows-1)
