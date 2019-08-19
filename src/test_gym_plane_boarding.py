@@ -1,10 +1,13 @@
 #%% Imports and function declarations
-from src.gym_env import *
+from gym_plane_boarding.envs.plane_boarding_env import *
 
 #%% Testing Development Zone
+seat_rows = 32
+plane_layout = planes_layouts['b_737']
+num_passengers = seat_rows * len(list(compress(plane_layout, plane_layout)))
 
 # Initialize environment
-env = OnBoardingEnvironment(seat_rows=seat_rows, seat_layout=seat_layout)
+env = PlaneBoardingEnvironment(seat_rows=seat_rows, seat_layout=plane_layout)
 env.reset()
 
 # Generate random initial action
@@ -17,7 +20,7 @@ for _ in range(1):
     print(observation, reward, done, info)
 
     if done:
-        print("Finished after {} timesteps".format(t + 1))
+        print("Finished after {} time steps".format(-reward))
         break
 
 print('End of one game!')
