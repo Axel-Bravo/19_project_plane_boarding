@@ -3,7 +3,7 @@ from gym import spaces
 from src.utils import *
 
 
-class OnBoardingEnvironment(gym.Env):
+class PlaneBoardingEnvironment(gym.Env):
     """
     A plan on-boarding simulator environment for OpenAI gym
 
@@ -20,7 +20,7 @@ class OnBoardingEnvironment(gym.Env):
         :param seat_rows: number of rows from the airplane
         :param seat_layout: seat columns structure; e.g. (0, 0, 0, 1, 0, 0, 0);  0 - seat, 1 - aisle
         """
-        super(OnBoardingEnvironment, self).__init__()
+        super(PlaneBoardingEnvironment, self).__init__()
 
         self.seat_rows = seat_rows
         self.seat_layout = seat_layout
