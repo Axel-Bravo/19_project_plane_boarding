@@ -3,14 +3,8 @@ import time
 import random
 from itertools import compress, product
 
-planes_layouts = {
-    'b_747': (1, 1, 0, 1, 1, 1, 1, 0, 1, 1),
-    'a_380': (1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1)
-}
-
 
 class Plane(object):
-
     def __init__(self, seat_rows: int, seat_layout: tuple):
         """
         Plane initialization
@@ -50,7 +44,6 @@ class Plane(object):
 
 
 class Passenger(object):
-
     def __init__(self, seat: (int, int), plane: Plane):
         """
         Passenger initialization
