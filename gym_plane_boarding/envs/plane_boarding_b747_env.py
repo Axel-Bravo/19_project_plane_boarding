@@ -3,28 +3,27 @@ from gym import spaces
 from src.utils import *
 
 
-class PlaneBoardingEnvironment(gym.Env):
+class PlaneBoardingB747Environment(gym.Env):
     """
-    A plan on-boarding simulator environment for OpenAI gym
+    A plan on-boarding simulator environment for OpenAI gym; based on a Lufthansa's Boeing 747-400 (744)
+    V1 configuration (393 seats). Adapted to the current unique seat layout configuration.
 
     This environment has the particularity that it just has an initial action, the sorting of the queue.
     After this has been performed, the full simulation runs and returns the number of steps taken as the
-    negative reward.
+    negative reward. Having 50 seat rows; 393 seats / 8 seats per row = 49,125
 
     """
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, seat_rows: int, seat_layout: tuple):
+    def __init__(self):
         """
         On-boarding OpenAI gym's environment initialization
-        :param seat_rows: number of rows from the airplane
-        :param seat_layout: seat columns structure; e.g. (0, 0, 0, 1, 0, 0, 0);  0 - seat, 1 - aisle
         """
-        super(PlaneBoardingEnvironment, self).__init__()
+        super(PlaneBoardingB747Environment, self).__init__()
 
-        self.seat_rows = seat_rows
-        self.seat_layout = seat_layout
-        self.num_passengers = seat_rows * len(list(compress(seat_layout, seat_layout)))
+        self.seat_rows = 50
+        self.seat_layout = (1, 1, 0, 1, 1, 1, 1, 0, 1, 1)
+        self.num_passengers = self.seat_rows * len(list(compress(self.seat_layout, self.seat_layout)))
 
         # Reward is negative,; the less time the simulation spends the better
         # As simulation is deterministic, the time spent is attributable to the queue ordering ability
@@ -41,7 +40,7 @@ class PlaneBoardingEnvironment(gym.Env):
         #  Rows: seat_rows
         #  Columns: (0, len(seat_layout)-1) -> len(seat_layout); although aisles are not "usable"
         #  Baggage: (0, 20) -> 21 values; current implementation
-        self.passenger_space = [seat_rows, len(seat_layout), 21]
+        self.passenger_space = [self.seat_rows, len(self.seat_layout), 21]
         self.observation_space = spaces.MultiDiscrete([self.passenger_space for _ in range(self.num_passengers)])
 
         # Simulation required attributes

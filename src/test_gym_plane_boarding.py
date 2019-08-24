@@ -1,17 +1,15 @@
 #%% Imports and function declarations
-from gym_plane_boarding.envs.plane_boarding_env import *
+# pip install -e 19_project_onboarding/
+import gym
+import random
 
 #%% Testing Development Zone
-seat_rows = 32
-plane_layout = planes_layouts['b_737']
-num_passengers = seat_rows * len(list(compress(plane_layout, plane_layout)))
-
 # Initialize environment
-env = PlaneBoardingEnvironment(seat_rows=seat_rows, seat_layout=plane_layout)
+env = gym.make('gym_plane_boarding:b737-v0')  # Available: "b737-v0", "b747-v0", "a380-v0"
 env.reset()
 
 # Generate random initial action
-random_plane_queue_order = [i for i in range(1, num_passengers + 1)]
+random_plane_queue_order = [i for i in range(1, env.observation_space.shape[0] + 1)]
 random.shuffle(random_plane_queue_order)
 
 # Execute simulation
