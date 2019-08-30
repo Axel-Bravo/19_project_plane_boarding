@@ -10,7 +10,7 @@ class PlaneBoardingB747Environment(gym.Env):
 
     This environment has the particularity that it just has an initial action, the sorting of the queue.
     After this has been performed, the full simulation runs and returns the number of steps taken as the
-    negative reward. Having 50 seat rows; 393 seats / 8 seats per row = 49,125
+    negative reward. Having 50 seat rows (400 seats); 393 seats / 8 seats per row = 49,125
 
     """
     metadata = {'render.modes': ['human']}

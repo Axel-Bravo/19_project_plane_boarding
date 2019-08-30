@@ -10,7 +10,7 @@ class PlaneBoardingA380Environment(gym.Env):
 
     This environment has the particularity that it just has an initial action, the sorting of the queue.
     After this has been performed, the full simulation runs and returns the number of steps taken as the
-    negative reward. Having 55 seat rows; 564 seats / 10 seats per row = 56,4
+    negative reward. Having 57 seat rows (570 seats); 564 seats / 10 seats per row = 56,4
 
     """
     metadata = {'render.modes': ['human']}
@@ -21,7 +21,7 @@ class PlaneBoardingA380Environment(gym.Env):
         """
         super(PlaneBoardingA380Environment, self).__init__()
 
-        self.seat_rows = 55
+        self.seat_rows = 57
         self.seat_layout = (1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1)
         self.num_passengers = self.seat_rows * len(list(compress(self.seat_layout, self.seat_layout)))
 
