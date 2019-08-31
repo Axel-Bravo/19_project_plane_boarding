@@ -1,7 +1,7 @@
-import numpy as np
 import random
-
 from collections import namedtuple
+
+import numpy as np
 
 Experience = namedtuple('Experience', ['state', 'action', 'reward'])
 
@@ -22,7 +22,7 @@ class ReplayBuffer(object):
         self.capacity = capacity
         self.saved_id = 0
 
-    def add(self, state: np.ndarray, action: list, reward: int):
+    def add(self, state: np.ndarray, action: np.ndarray, reward: int):
         """
         Adds the new experience on the list, in case of not having enough memory, it overrides the older record
         :param state: initial passengers description
