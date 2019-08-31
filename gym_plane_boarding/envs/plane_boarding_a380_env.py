@@ -7,11 +7,11 @@ class PlaneBoardingA380Environment(gym.Env):
     """
     A plan on-boarding simulator environment for OpenAI gym; based on a Lufthansa's Airbus A380-800 (388)
     V1 configuration (564 seats). Adapted to the current unique seat layout configuration.
+    Having 57 seat rows (570 seats); 564 seats / 10 seats per row = 56,4
 
     This environment has the particularity that it just has an initial action, the sorting of the queue.
     After this has been performed, the full simulation runs and returns the number of steps taken as the
-    negative reward. Having 57 seat rows (570 seats); 564 seats / 10 seats per row = 56,4
-
+    negative reward.
     """
     metadata = {'render.modes': ['human']}
 

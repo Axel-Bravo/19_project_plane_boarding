@@ -7,11 +7,11 @@ class PlaneBoardingB747Environment(gym.Env):
     """
     A plan on-boarding simulator environment for OpenAI gym; based on a Lufthansa's Boeing 747-400 (744)
     V1 configuration (393 seats). Adapted to the current unique seat layout configuration.
+    Having 50 seat rows (400 seats); 393 seats / 8 seats per row = 49,125
 
     This environment has the particularity that it just has an initial action, the sorting of the queue.
     After this has been performed, the full simulation runs and returns the number of steps taken as the
-    negative reward. Having 50 seat rows (400 seats); 393 seats / 8 seats per row = 49,125
-
+    negative reward.
     """
     metadata = {'render.modes': ['human']}
 

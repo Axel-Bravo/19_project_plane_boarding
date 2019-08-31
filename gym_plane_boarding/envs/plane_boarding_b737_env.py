@@ -7,11 +7,11 @@ class PlaneBoardingB737Environment(gym.Env):
     """
     A plan on-boarding simulator environment for OpenAI gym; based on a Lufthansa's Boeing 737-300 (737)
     configuration (124 seats). Adapted to the current unique seat layout configuration.
+    Having 21 seat rows (126 seats); 124 seats / 6 seats per row = 20,667
 
     This environment has the particularity that it just has an initial action, the sorting of the queue.
     After this has been performed, the full simulation runs and returns the number of steps taken as the
-    negative reward. Having 21 seat rows (126 seats); 124 seats / 6 seats per row = 20,667
-
+    negative reward.
     """
     metadata = {'render.modes': ['human']}
 
