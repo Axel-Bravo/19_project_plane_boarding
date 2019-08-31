@@ -31,9 +31,9 @@ class PlaneBoardingB737Environment(gym.Env):
         self.reward_range = (-10000, 0)
 
         # The action space is basically an ordering for the passengers queue. This ordering is expected to be, a
-        # prioritization assignation value of the queue; for the NN training, a softmax approach will be take into
-        # the last layer, provoking that the passenger with higher priority to on board will be the one with the
-        # highest value, the second on priority to on board will be the second highest value and so on.
+        # prioritization assignation value of the queue; for the neural network agent training, a log-softmax approach
+        # will be take into the last layer, provoking that the passenger with higher priority to on board will be the
+        # one with the highest value, the second on priority to on board will be the second highest value and so on.
         #
         # Having:
         #        (number of passengers order possibilities)  * number of passengers
