@@ -1,8 +1,12 @@
 #%% Imports and function declarations
-# pip install -e 19_project_onboarding/
+# pip install -e gym_plane_boarding/
 import gym
 import random
+import numpy as np
 from src.utils import ReplayBuffer
+
+from tensorflow.nn import log_softmax
+from tensorflow import convert_to_tensor, cast, float32
 
 
 #%% Environment Initialization
@@ -16,6 +20,7 @@ for _ in range(2500):
 
     # Generate random action
     random_plane_queue_order = [i for i in range(1, env.observation_space.shape[0] + 1)]
+    random_plane_queue_order = np.array(log_softmax(cast(convert_to_tensor(random_plane_queue_order), float32)))
     random.shuffle(random_plane_queue_order)
 
     observation, reward, done, info = env.step(action=random_plane_queue_order)
@@ -23,4 +28,3 @@ for _ in range(2500):
 
 # Agent learning
     # TODO: implement initial DRL agent algorithm
-
