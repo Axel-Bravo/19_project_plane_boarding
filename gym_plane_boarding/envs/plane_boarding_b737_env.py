@@ -1,6 +1,6 @@
 import gym
 from gym import spaces
-from src.utils import *
+from gym_plane_boarding.envs.utils import *
 
 
 class PlaneBoardingB737Environment(gym.Env):
