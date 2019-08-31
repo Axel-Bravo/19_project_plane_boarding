@@ -28,12 +28,28 @@ dependencies:
   - xz=5.2.4=h14c3975_4
   - zlib=1.2.11=h7b6447c_3
   - pip:
+    - absl-py==0.8.0
+    - astor==0.8.0
     - cloudpickle==1.2.1
     - future==0.17.1
+    - gast==0.2.2
+    - google-pasta==0.1.7
+    - grpcio==1.23.0
     - gym==0.14.0
+    - h5py==2.9.0
+    - keras-applications==1.0.8
+    - keras-preprocessing==1.1.0
+    - markdown==3.1.1
     - numpy==1.17.0
+    - opt-einsum==3.0.1
+    - protobuf==3.9.1
     - pyglet==1.3.2
     - scipy==1.3.1
     - six==1.12.0
-
+    - tb-nightly==1.15.0a20190806
+    - tensorflow-gpu==2.0.0rc0
+    - termcolor==1.1.0
+    - tf-estimator-nightly==1.14.0.dev2019080601
+    - werkzeug==0.15.5
+    - wrapt==1.11.2
 
