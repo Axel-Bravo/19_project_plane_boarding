@@ -30,7 +30,11 @@ class PlaneBoardingA380Environment(gym.Env):
         # The selected number -10000 is just a number with margin, actual simulations take 1500 steps
         self.reward_range = (-10000, 0)
 
-        # The action space is basically an ordering for the passengers queue
+        # The action space is basically an ordering for the passengers queue. This ordering is expected to be, a
+        # prioritization assignation value of the queue; for the NN training, a softmax approach will be take into
+        # the last layer, provoking that the passenger with higher priority to on board will be the one with the
+        # highest value, the second on priority to on board will be the second highest value and so on.
+        #
         # Having:
         #        (number of passengers order possibilities)  * number of passengers
         # In combination with the state space, it indicates which is the entering order, a passenger should have
@@ -68,7 +72,7 @@ class PlaneBoardingA380Environment(gym.Env):
         :return: result of the simulation
         """
         # Reorder queue, based on algorithm order
-        self.queue = [i_queue for _, i_queue in sorted(zip(action, self.queue))]
+        self.queue = [i_queue for _, i_queue in sorted(zip(action, self.queue), reverse=True)]
 
         # Run simulation
         while True:
