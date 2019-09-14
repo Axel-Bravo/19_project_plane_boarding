@@ -2,6 +2,12 @@ import random
 from collections import namedtuple
 
 import numpy as np
+import tensorflow.keras as keras
+from tensorflow.keras import layers
+from tensorflow.random import set_seed
+
+set_seed(2)
+
 
 Experience = namedtuple('Experience', ['state', 'action', 'reward'])
 
@@ -63,3 +69,40 @@ class ReplayBuffer(object):
                                    passenger.baggage])
 
         return np.array(temp_structure)
+
+
+class QAproximator(object):
+    """ Action-value approximator based in neural networks """
+
+    def __init__(self):
+        self.network = None
+
+    def generate_action_value(self, queue_shape: tuple, model_name='q_network'):
+        """
+        Generates the neural network structure to use as Q-approximator
+        :param queue_shape: input shape of the state
+        :param model_name: model of the neural network
+        :return:
+        """
+        queue_input = keras.Input(shape=queue_shape, name='queue_input')
+        queue_dense = layers.Dense(64, activation='relu', name='queue_dense')(queue_input)
+        dense = layers.Dense(64, activation='relu', name='Dense_1')(queue_dense)
+        dense = layers.Dense(32, activation='relu', name='Dense_2')(dense)
+        outputs = layers.Dense(1, activation='softmax', name='Output')(dense)
+        model = keras.Model(inputs=queue_input, outputs=outputs, name=model_name)
+
+        self.network = model
+
+    def learn(self, experiences: np.array):
+        pass
+
+    def predict(self) -> np.array:
+        pass
+
+    def copy_weights(self, network_to_copy: object):
+        """
+        Copy weights from a given Q, action-value approximator, to another
+        :param network_to_copy: network which will be used as origin of the weights
+        :return: None
+        """
+        self.network.set_weights(network_to_copy.get_weights())
