@@ -8,8 +8,9 @@ been focused in the realization of:
 
 ## Structure 
 There are two developments:
- 1- The gym environment, for more information see its own README in: `\gym_plane_boarding\` 
- 2- The development of the DRL Deep-Q Network algorithm, in the source folder: `\src\` 
+- The gym environment, for more information see its own README in: `\gym_plane_boarding\` 
+- The development of the DRL Deep-Q Network algorithm, in the source folder: `\src\` 
+ 
 
 On the source folder there are mainly two developments:
 - `plane_boarding_simulator`: contains a self-contained plane boarding simulator, in which the gym environment is based
