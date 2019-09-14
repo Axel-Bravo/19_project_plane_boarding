@@ -6,6 +6,15 @@ been focused in the realization of:
 2. Creation of a simple DRL algorithm to start solving the challenge, by using `Deep Q-learning`
 3. Creation of more advanced DRL algorithms
 
+## Structure 
+There are two developments:
+ 1- The gym environment, for more information see its own README in: `\gym_plane_boarding\` 
+ 2- The development of the DRL Deep-Q Network algorithm, in the source folder: `\src\` 
+
+On the source folder there are mainly two developments:
+- `plane_boarding_simulator`: contains a self-contained plane boarding simulator, in which the gym environment is based
+- `plane_boarding` + `utils`: contains the Deep-Q Network implementation (not completed, see _Problematic_). 
+
 ## Problematic 
 Though being aware of the difficulty in the training fo the simulator, as the simulator has only one action per
 execution, for more information see the README from the environment. `gym_plane_boarding\README.md`. 
