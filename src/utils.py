@@ -1,249 +1,108 @@
-import os
-import time
 import random
-from itertools import compress, product
+from collections import namedtuple
 
-planes_layouts = {
-    'b_737': (1, 1, 1, 0, 1, 1, 1),
-    'b_747': (1, 1, 0, 1, 1, 1, 1, 0, 1, 1),
-    'a_380': (1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1)
-}
+import numpy as np
+import tensorflow.keras as keras
+from tensorflow.keras import layers
+from tensorflow.random import set_seed
 
-
-class Plane(object):
-
-    def __init__(self, seat_rows: int, seat_layout: tuple):
-        """
-        Plane initialization
-        :param seat_rows: number of rows from the airplane
-        :param seat_layout: seat columns structure; e.g. (0, 0, 0, 1, 0, 0, 0);  0 - seat, 1 - aisle
-        """
-        self.seat_rows = seat_rows
-        self.seat_layout = seat_layout
-        self.passengers = []
-        self.layout = [[[] for _ in range(len(self.seat_layout))] for _ in range(self.seat_rows)]
-        self.next_layout = [[[] for _ in range(len(self.seat_layout))] for _ in range(self.seat_rows)]
-
-    def update_layout(self):
-        """
-        Updates the plane current layout with next state
-        """
-        self.layout = self.next_layout
-        self.next_layout = [[[] for _ in range(len(self.seat_layout))] for _ in range(self.seat_rows)]
-
-    def all_seated(self):
-        """
-        Checks if all passengers are currently seated
-        """
-        for agent in self.passengers:
-            if agent.current_mov != 'sit':
-                return False
-        return True
-
-    def is_empty(self, row: int, col:int) -> bool:
-        """
-        Checks if a seat is and/or will be empty
-        :param row: seat's row
-        :param col: set's column
-        :return: seat and will be empty
-        """
-        return len(self.layout[row][col]) == 0 and len(self.next_layout[row][col]) == 0
+set_seed(2)
 
 
-class Passenger(object):
-
-    def __init__(self, seat: (int, int), plane: Plane):
-        """
-        Passenger initialization
-        :param seat: seat assigned to passenger; (seat, column)
-        :param plane:
-        """
-        # Static
-        self.seat = list(seat)
-        self.baggage = random.randint(0, 20)
-        self.plane = plane
-        # Dynamic
-        self.pos = [-1, -1]
-        self.current_mov = ''
-        self.move_count = -1
-
-    def choose_move(self):
-        if self.seat == self.pos:
-            self.current_mov = 'sit'
-            return
-
-        if self.seat[0] > self.pos[0]:
-            self.current_mov = 'up'
-            return
-
-        if self.seat[0] == self.pos[0]:
-            if self.baggage > 0:
-                self.current_mov = 'baggage'
-                return
-            if self.seat[1] > self.pos[1]:
-                self.current_mov = 'right'
-                return
-            else:
-                self.current_mov = 'left'
-                return
-        print("error! Unknown step")
-
-    def move(self):
-        if self.current_mov == '':
-            self.choose_move()
-        if self.current_mov == 'sit':
-            self.sit()
-        if self.current_mov == 'up':
-            self.move_up()
-        if self.current_mov == 'baggage':
-            self.set_baggage()
-        if self.current_mov == 'right':
-            self.move_right()
-        if self.current_mov == 'left':
-            self.move_left()
-        if self.current_mov == 'standLeft':
-            self.stand_left()
-        if self.current_mov == 'standRight':
-            self.stand_right()
-
-    def move_right(self):
-        clear = True
-        for seat in range(self.pos[1] + 1, self.seat[1]):
-            if not self.plane.is_empty(self.pos[0], seat):
-                clear = False
-                for agent in self.plane.layout[self.pos[0]][seat]:
-                    if agent.seat[1] < self.seat[1] and not agent in self.plane.next_layout[self.pos[0]][self.pos[1]]:
-                        agent.current_mov = 'standLeft'
-        if not clear:
-            self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-            return
-        if clear:
-            my_turn = True
-            for agent in self.plane.layout[self.pos[0]][self.pos[1]]:
-                if agent == self:
-                    continue
-
-                if agent.seat[1] > self.seat[1] and agent.current_mov == self.current_mov:
-                    my_turn = False
-            if not my_turn:
-                self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-                return
-            self.pos[1] += 1
-            self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-            if self.pos[1] == self.seat[1]:
-                self.current_mov = ''
-
-    def move_left(self):
-        clear = True
-        for seat in range(self.seat[1], self.pos[1]):
-            if not self.plane.is_empty(self.pos[0], seat):
-                clear = False
-                for agent in self.plane.layout[self.pos[0]][seat]:
-                    if agent.seat[1] > self.seat[1] and not agent in self.plane.next_layout[self.pos[0]][self.pos[1]]:
-                        agent.current_mov = 'standRight'
-        if not clear:
-            self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-            return
-        if clear:
-            my_turn = True
-            for agent in self.plane.layout[self.pos[0]][self.pos[1]]:
-                if agent == self:
-                    continue
-                if agent.seat[1] < self.seat[1] and agent.current_mov == self.current_mov:
-                    my_turn = False
-            if not my_turn:
-                self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-                return
-            self.pos[1] -= 1
-            self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-            if self.pos[1] == self.seat[1]:
-                self.current_mov = ''
-
-    def move_up(self):
-        if self.plane.is_empty(self.pos[0] + 1, self.pos[1]) and len(self.plane.layout[self.pos[0]][self.pos[1]]) == 1:
-            self.pos[0] += 1
-            self.current_mov = ''
-        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-
-    def set_baggage(self):
-        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-        self.baggage -= 1
-        if self.baggage == 0:
-            self.current_mov = ''
-
-    def stand_left(self):
-        if self.plane.is_empty(self.pos[0], self.pos[1] - 1) or self.plane.seat_layout[self.pos[1] - 1] == 0:
-            self.pos[1] -= 1
-        if self.plane.seat_layout[self.pos[1]] == 0:
-            self.current_mov = 'right'
-        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-
-    def stand_right(self):
-        if self.plane.is_empty(self.pos[0], self.pos[1] + 1) or self.plane.seat_layout[self.pos[1] + 1] == 0:
-            self.pos[1] += 1
-        if self.plane.seat_layout[self.pos[1]] == 0:
-            self.current_mov = 'left'
-        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
-
-    def sit(self):
-        self.plane.next_layout[self.pos[0]][self.pos[1]].append(self)
+Experience = namedtuple('Experience', ['state', 'action', 'reward'])
 
 
-def generate_queue(plane: Plane) -> list:
+class ReplayBuffer(object):
     """
-    Generates a queue of passengers
-    :param plane: a plane in order to know seats availability
-    :return: passenger's queue
+    ReplayBuffer used to store the different simulations in order to be able to accumulate enough experience,
+    between agent learning steps. It has a limited capacity, overwriting the oldest values in case it requires to
+    store new ones.
     """
-    queue = []
-    seat_columns = compress(range(len(plane.seat_layout)), plane.seat_layout)
-    seats = product(list(range(plane.seat_rows)), seat_columns)
 
-    for seat in seats:
-        queue.append(Passenger(seat=seat, plane=plane))
+    def __init__(self, capacity: int = 10000):
+        """
+        ReplayBuffer initializer
+        :param capacity: indicates the ReplayBuffer capacity
+        """
+        self.data = [None for _ in range(capacity)]
+        self.capacity = capacity
+        self.saved_id = 0
 
-    return queue
+    def add(self, state: np.ndarray, action: np.ndarray, reward: int):
+        """
+        Adds the new experience on the list, in case of not having enough memory, it overrides the older record
+        :param state: initial passengers description
+        :param action: order assigned to the queue of passengers
+        :param reward: time elapsed till the boarding is fully completed
+        """
+        self.data[self.saved_id % self.capacity] = Experience(state=self.transform_queue(state),
+                                                              action=action,
+                                                              reward=reward)
+        self.saved_id += 1
+
+    def sample(self, num_experiences: int) -> (np.ndarray, np.ndarray, np.ndarray):
+        """
+        Samples random experiences in order to train the into the reinforcement learning agent
+        :param num_experiences: number of experience we want to sample, without replacement
+        :return: random states, actions and rewards from our ReplayBuffer
+        """
+        random_indexes = random.sample(population=range(self.capacity), k=num_experiences)
+
+        states = np.array([self.data[random_index].state for random_index in random_indexes])
+        actions = np.array([self.data[random_index].action for random_index in random_indexes])
+        rewards = np.array([self.data[random_index].reward for random_index in random_indexes])
+
+        return states, actions, rewards
+
+    @staticmethod
+    def transform_queue(queue: list) -> np.ndarray:
+        """
+        Given a passenger's queue in environment suited format, transform in into a more suitable neural network
+        format
+        :param queue: the passenger's queue to transform
+        :return: the passenger's queue properly formatted
+        """
+        temp_structure = []
+        for passenger in queue:
+            temp_structure.append([passenger.seat[0],
+                                   passenger.seat[1],
+                                   passenger.baggage])
+
+        return np.array(temp_structure)
 
 
-def print_simulation(plane: Plane, queue: list, aisle_columns: list, num_simulations: int):
-    """
-    Print the simulation by the  python's terminal console
-    :param plane: plane used in the simulation
-    :param queue: queue of passengers of the on-boarding process
-    :param aisle_columns: aisle'columns plane layout
-    :param num_simulations: number of simulations to execute
-    """
-    os.system('clear')
-    for _ in range(len(plane.seat_layout) + 1):  # Print separator
-        print("", end='')
+class QAproximator(object):
+    """ Action-value approximator based in neural networks """
 
-    for _ in range(len(queue)):  # Print remaining queue
-        print('<', end='')
-    print('\n')
+    def __init__(self):
+        self.network = None
 
-    for i in range(plane.seat_rows):  # Print current plane layout status
-        for j in range(len(plane.seat_layout)):
-            if len(plane.layout[i][j]) != 0:
-                if len(plane.layout[i][j]) > 1:
-                    print(len(plane.layout[i][j]), end='')
-                elif plane.layout[i][j][0].current_mov == 'standRight' or plane.layout[i][j][
-                    0].current_mov == 'right':
-                    print('>', end='')
-                elif plane.layout[i][j][0].current_mov == 'standLeft' or plane.layout[i][j][0].current_mov == 'left':
-                    print('<', end='')
-                elif plane.layout[i][j][0].current_mov == 'up':
-                    print('V', end='')
-                elif plane.layout[i][j][0].current_mov == 'baggage':
-                    print('B', end='')
-                elif plane.layout[i][j][0].current_mov == 'sit':
-                    print('S', end='')
-                else:
-                    print('?', end='')
-            elif j in aisle_columns:
-                print('|', end='')
-            else:
-                print('_', end='')
-        print('')
+    def generate_action_value(self, queue_shape: tuple, model_name='q_network'):
+        """
+        Generates the neural network structure to use as Q-approximator
+        :param queue_shape: input shape of the state
+        :param model_name: model of the neural network
+        :return:
+        """
+        queue_input = keras.Input(shape=queue_shape, name='queue_input')
+        queue_dense = layers.Dense(64, activation='relu', name='queue_dense')(queue_input)
+        dense = layers.Dense(64, activation='relu', name='Dense_1')(queue_dense)
+        dense = layers.Dense(32, activation='relu', name='Dense_2')(dense)
+        outputs = layers.Dense(1, activation='softmax', name='Output')(dense)
+        model = keras.Model(inputs=queue_input, outputs=outputs, name=model_name)
 
-    print('\nCurrent round: {}'.format(num_simulations))
-    time.sleep(0.04)
+        self.network = model
+
+    def learn(self, experiences: np.array):
+        pass
+
+    def predict(self) -> np.array:
+        pass
+
+    def copy_weights(self, network_to_copy: object):
+        """
+        Copy weights from a given Q, action-value approximator, to another
+        :param network_to_copy: network which will be used as origin of the weights
+        :return: None
+        """
+        self.network.set_weights(network_to_copy.get_weights())

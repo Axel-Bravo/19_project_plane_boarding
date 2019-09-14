@@ -1,17 +1,17 @@
 import gym
 from gym import spaces
-from src.utils import *
+from gym_plane_boarding.envs.utils import *
 
 
 class PlaneBoardingB747Environment(gym.Env):
     """
     A plan on-boarding simulator environment for OpenAI gym; based on a Lufthansa's Boeing 747-400 (744)
     V1 configuration (393 seats). Adapted to the current unique seat layout configuration.
+    Having 50 seat rows (400 seats); 393 seats / 8 seats per row = 49,125
 
     This environment has the particularity that it just has an initial action, the sorting of the queue.
     After this has been performed, the full simulation runs and returns the number of steps taken as the
-    negative reward. Having 50 seat rows; 393 seats / 8 seats per row = 49,125
-
+    negative reward.
     """
     metadata = {'render.modes': ['human']}
 
@@ -30,7 +30,11 @@ class PlaneBoardingB747Environment(gym.Env):
         # The selected number -10000 is just a number with margin, actual simulations take 1500 steps
         self.reward_range = (-10000, 0)
 
-        # The action space is basically an ordering for the passengers queue
+        # The action space is basically an ordering for the passengers queue. This ordering is expected to be, a
+        # prioritization assignation value of the queue; for the neural network agent training, a log-softmax approach
+        # will be take into the last layer, provoking that the passenger with higher priority to on board will be the
+        # one with the highest value, the second on priority to on board will be the second highest value and so on.
+        #
         # Having:
         #        (number of passengers order possibilities)  * number of passengers
         # In combination with the state space, it indicates which is the entering order, a passenger should have
@@ -68,7 +72,7 @@ class PlaneBoardingB747Environment(gym.Env):
         :return: result of the simulation
         """
         # Reorder queue, based on algorithm order
-        self.queue = [i_queue for _, i_queue in sorted(zip(action, self.queue))]
+        self.queue = [i_queue for _, i_queue in sorted(zip(action, self.queue), reverse=True)]
 
         # Run simulation
         while True:
