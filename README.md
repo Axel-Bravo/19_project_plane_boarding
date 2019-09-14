@@ -12,7 +12,7 @@ There are two developments:
 - The development of the DRL Deep-Q Network algorithm, in the source folder: `\src\` 
  
 
-On the source folder there are mainly two developments:
+On the source folder there are mainly two codes:
 - `plane_boarding_simulator`: contains a self-contained plane boarding simulator, in which the gym environment is based
 
 - `plane_boarding` + `utils`: contains the Deep-Q Network implementation (not completed, see _Problematic_). 
