@@ -13,6 +13,7 @@ There are two developments:
 
 On the source folder there are mainly two developments:
 - `plane_boarding_simulator`: contains a self-contained plane boarding simulator, in which the gym environment is based
+
 - `plane_boarding` + `utils`: contains the Deep-Q Network implementation (not completed, see _Problematic_). 
 
 ## Problematic 
